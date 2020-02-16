@@ -24,19 +24,25 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+  List<ListItem> conversion = getMyConversation();
+
   MyHomePage({String title});
 
   @override
   State<StatefulWidget> createState() {
-    return HomePage();
+    return HomePage(conversion);
   }
 }
 
 class HomePage extends State<MyHomePage> {
+  TextEditingController messageController = TextEditingController();
+
+  List<ListItem> conversion = <ListItem>[];
+
+  HomePage(this.conversion);
+
   @override
   Widget build(BuildContext context) {
-    List<ListItem> conversion = getMyConversation();
-
     return Scaffold(
       appBar: AppBar(
         title: Text("FLUTTER CHAT UI"),
@@ -72,24 +78,47 @@ class HomePage extends State<MyHomePage> {
               ),
             ),
             Stack(
-                children: <Widget>[
-                  TextField(
-                    decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Your message here",
-                        alignLabelWithHint: false),
+              children: <Widget>[
+                TextField(
+                  controller: messageController,
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Your message here",
+                      alignLabelWithHint: false),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                    child: GestureDetector(
+                      onTap: () {
+                        print("OnTap");
+                        setState(() {
+                          String message = messageController.text.toString();
+                          conversion.add(OutgoingTextMessage(message));
+                        });
+                      },
+                      child: Icon(
+                        Icons.send,
+                        color: Colors.teal,
+                      ),
+                    ),
+                    alignment: Alignment.centerRight,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(child: Icon(Icons.send,color: Colors.teal,),alignment: Alignment.centerRight,),
-                  )
-                ],
-              ),
+                )
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    messageController.dispose();
+    super.dispose();
   }
 }
 
@@ -184,8 +213,11 @@ Widget OutgoingTextMessageWidget(OutgoingTextMessage textMessage) {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0.0,5.0,5.0,0.0),
-            child: Text("Me",style: TextStyle(color: Colors.teal,fontSize: 12.0),),
+            padding: const EdgeInsets.fromLTRB(0.0, 5.0, 5.0, 0.0),
+            child: Text(
+              "Me",
+              style: TextStyle(color: Colors.teal, fontSize: 12.0),
+            ),
           )
         ],
       ),
@@ -217,7 +249,7 @@ Widget OutgoingPictureMessageWidget(OutgoingPictureMessage pictureMessage) {
 }
 
 List<ListItem> getMyConversation() {
-  List<ListItem> conversation = <ListItem>[];
+  var conversation = <ListItem>[];
   String senderPicture = "images/user_picture.png";
   conversation.add(IncomingTextMessage("Hello Ali", senderPicture));
   conversation.add(OutgoingTextMessage("Hello Ahmad"));
@@ -225,7 +257,8 @@ List<ListItem> getMyConversation() {
   conversation.add(IncomingTextMessage("How are you?", senderPicture));
   conversation.add(OutgoingTextMessage("I am good"));
 
-  conversation.add(IncomingPictureMessage("images/trekking.png", senderPicture));
+  conversation
+      .add(IncomingPictureMessage("images/trekking.png", senderPicture));
   conversation.add(IncomingTextMessage("Let's go for walk", senderPicture));
 
   conversation.add(OutgoingPictureMessage("images/happy.png"));
